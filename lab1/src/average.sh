@@ -1,8 +1,7 @@
 #!/bin/bash
 #echo There were $# parameters passed
 
-exec 0</home/root/share/laba1/numbers.txt
-
+exec 0</home/root/share/os_lab_2019/lab1/src/numbers.txt
 count=0
 sum=0
 average=1
