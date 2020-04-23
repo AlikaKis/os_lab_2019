@@ -41,29 +41,29 @@ int main(int argc, char **argv) {
           case 0:
             seed = atoi(optarg);
             // your code here
-		if(seed <= 0){
-		   printf("seed is positive\n");		
-		   return -1;
-		}
             // error handling
+            if(seed <= 0){
+            printf("seed is positive\n");		
+            return -1;
+		}
             break;
           case 1:
             array_size = atoi(optarg);
             // your code here
-		if(array_size <= 0){
-		   printf("array_size is positive \n");		
-		   return -1;
-		}
             // error handling
+            if(array_size <= 0){
+            printf("array_size is positive \n");		
+            return -1;
+		}
             break;
           case 2:
             pnum = atoi(optarg);
-		if(pnum <= 0){
-		   printf("Amount of processes is positive\n");		
-		   return -1;
-		}
             // your code here
             // error handling
+            if(pnum <= 0){
+            printf("amount of processes is positive\n");		
+            return -1;
+		}
             break;
           case 3:
             with_files = true;
@@ -99,11 +99,16 @@ int main(int argc, char **argv) {
   }
   int *array = (int*)malloc(sizeof(int) * array_size);
   GenerateArray(array, array_size, seed);
+  int i = 0;
+  for (i = 0; i < array_size; i++)
+    {
+        printf("%d ", array[i]);
+    }
+    printf("\n");
   int active_child_processes = 0;
   int f_p[2];
   int sizeforprocess= pnum<=array_size ? (array_size/pnum) : 1;
   FILE *file;
-  int i = 0;
   int j = 0;
   struct timeval start_time;
   gettimeofday(&start_time, NULL);
@@ -113,7 +118,7 @@ int main(int argc, char **argv) {
 	      }
   }else{
 	
-  	file=fopen("tile","wb+");
+  	file=fopen("file","wb+");
 	if(file == NULL)
 		printf("Can\'t create file\n");
 	}
@@ -127,10 +132,10 @@ int main(int argc, char **argv) {
       if (child_pid == 0) {
 	// child process
         // parallel somehow
-        int Min_Max[2];	  
+    int Min_Max[2];	  
 	int num=0;
 	int min = INT_MAX;
-    	int max = INT_MIN;
+    int max = INT_MIN;
 	int  begin = sizeforprocess*(active_child_processes-1);
 	int end = begin + sizeforprocess;
 	if(active_child_processes==pnum) 
@@ -143,8 +148,8 @@ int main(int argc, char **argv) {
 	     }
 	Min_Max[0]=min;
 	Min_Max[1]=max;
-        if (with_files) {
-
+    //printf("Process[%03d]:\t%d\t%d\n", active_child_processes, min, max);
+    if (with_files) {
           // use files here
 	fwrite(Min_Max,1,sizeof(Min_Max),file);
 	fclose(file);
@@ -173,7 +178,7 @@ if(!with_files)
  close(f_p[1]);
 else{
 fclose(file);
-  file=fopen("tile","rb");
+  file=fopen("file","rb");
 if(file==NULL)
 	printf("Can\'t create file\n");
 }
@@ -185,18 +190,17 @@ if(file==NULL)
   for (i = 0; i < pnum; i++) {
     int min = INT_MAX;
     int max = INT_MIN;
-    int mmnumb[2];
+    int arrmm[2];
 	
     if (with_files) {
        //read from files
-	fread(mmnumb,1,sizeof(mmnumb),file);
+	fread(arrmm,1,sizeof(arrmm),file);
     } else {
       // read from pipes
-	read(f_p[0],mmnumb,sizeof(int)*2);
+	read(f_p[0],arrmm,sizeof(int)*2);
     }
-	min=mmnumb[0];
-	max=mmnumb[1];	
-
+	min=arrmm[0];
+	max=arrmm[1];	
     if (min < min_max.min) min_max.min = min;
     if (max > min_max.max) min_max.max = max;
   }
