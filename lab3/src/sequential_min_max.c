@@ -5,6 +5,7 @@
 #include "utils.h"
 
 int main(int argc, char **argv) {
+int i = 0;
   if (argc != 3) {
     printf("Usage: %s seed arraysize\n", argv[0]);
     return 1;
@@ -25,6 +26,10 @@ int main(int argc, char **argv) {
   int *array = malloc(array_size * sizeof(int));
   GenerateArray(array, array_size, seed);
   struct MinMax min_max = GetMinMax(array, 0, array_size);
+    for (i = 0; i < array_size; i++)
+    {
+        printf("%d ", array[i]);
+    }
   free(array);
 
   printf("min: %d\n", min_max.min);
