@@ -15,12 +15,23 @@
 #include "find_min_max.h"
 #include "utils.h"
 
+ int*  PID_id;
+ int pnum;
+ int i = 0;
+    void kill_all(int sig)
+    {
+        for (i = 0; i < pnum; i++)
+        {
+            kill(PID_id[i], SIGKILL);
+        }
+    }
+
 int main(int argc, char **argv) {
   int seed = -1;
   int array_size = -1;
   int pnum = -1;
   bool with_files = false;
-  
+  int timeout = -1;
  
   while (true) {
     int current_optind = optind ? optind : 1;
@@ -29,6 +40,7 @@ int main(int argc, char **argv) {
                                       {"array_size", required_argument, 0, 0},
                                       {"pnum", required_argument, 0, 0},
                                       {"by_files", no_argument, 0, 'f'},
+                                      {"timeout", required_argument, 0, 0},
                                       {0, 0, 0, 0}};
 
     int option_index = 0;
@@ -67,6 +79,17 @@ int main(int argc, char **argv) {
             break;
           case 3:
             with_files = true;
+            break;
+
+          case 4:
+           timeout = atoi(optarg);
+           printf("Get %d\t", timeout);
+           
+           if (timeout <= 0)
+            {
+              printf("timeout is a positive number\n");
+              return 1;
+            }
             break;
 
           default:
@@ -122,6 +145,8 @@ int main(int argc, char **argv) {
 	if(file == NULL)
 		printf("Can\'t create file\n");
 	}
+
+    
   for (i = 0; i < pnum; i++) {
 
     pid_t child_pid = fork();
@@ -167,11 +192,20 @@ int main(int argc, char **argv) {
       return 1;
     }
   }
+
+
  
- int* stat;
+  if (timeout > 0)
+  {
+    printf("TIMEOUT NOW = %d\n", timeout);
+    alarm(timeout);
+    signal(SIGALRM, kill_all);
+    sleep(1);
+  }
+ 
+
   while (active_child_processes > 0) {
-   
-    wait(stat);
+    wait(0);
     active_child_processes -= 1;
   }
 if(!with_files)
@@ -194,10 +228,10 @@ if(file==NULL)
 	
     if (with_files) {
        //read from files
-	fread(arrmm,1,sizeof(arrmm),file);
+	fread(arrmm, 1, sizeof(arrmm), file);
     } else {
       // read from pipes
-	read(f_p[0],arrmm,sizeof(int)*2);
+	read(f_p[0], arrmm, sizeof(int)*2);
     }
 	min=arrmm[0];
 	max=arrmm[1];	
