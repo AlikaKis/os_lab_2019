@@ -15,7 +15,11 @@ zombie : zombie.o
 	$(CC) -c zombie.c
 	$(CC) zombie.o -o zombie
 	./zombie
- 
+
+process_memory : process_memory.o
+	$(CC) -c process_memory.c
+	$(CC) process_memory.o -o process_memory
+	./process_memory 
 
 parallel_min_max : utils.o find_min_max.o utils.h find_min_max.h
 	$(CC) -o parallel_min_max utils.o find_min_max.o parallel_min_max.c $(CFLAGS)
