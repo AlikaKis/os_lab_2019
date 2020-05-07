@@ -34,10 +34,10 @@ void *ThreadSum(void *args) {
 int main(int argc, char **argv) {
  
 
-  uint32_t threads_num = -1;
-  uint32_t array_size = -1;
-  uint32_t seed = -1;
-  uint32_t i;
+  int threads_num = -1;
+  int array_size = -1;
+  int seed = -1;
+  int i;
 while (true) {
     int current_optind = optind ? optind : 1;
 
