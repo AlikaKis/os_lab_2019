@@ -7,6 +7,7 @@
 #include <unistd.h>
 #include "utils.h"
 #include <pthread.h>
+#include "sum_array.h"
 
 struct SumArgs {
   int *array;
@@ -14,17 +15,6 @@ struct SumArgs {
   int end;
 };
 
-int Sum(int* array,int begin,int end) {
-  int sum = 0;
-  int i;
-  for(i = begin; i <= end; i++)
-  {
-      
-	sum+=array[i];
-        
-  }
-  return sum;
-}
 
 void *ThreadSum(void *args) {
   struct SumArgs *sum_args = (struct SumArgs *)args;
@@ -34,10 +24,10 @@ void *ThreadSum(void *args) {
 int main(int argc, char **argv) {
  
 
-  int threads_num = -1;
-  int array_size = -1;
-  int seed = -1;
-  int i;
+  uint32_t threads_num = -1;
+  uint32_t array_size = -1;
+  uint32_t seed = -1;
+  uint32_t i;
 while (true) {
     int current_optind = optind ? optind : 1;
 
@@ -56,7 +46,7 @@ while (true) {
           case 0:
             seed = atoi(optarg);
        
-		if(seed <= 0){
+		if(seed<=0){
 		   printf("seed can't be negative \n");		
 		   return -1;
 		}
@@ -65,7 +55,7 @@ while (true) {
           case 1:
             array_size = atoi(optarg);
      
-		if(array_size <= 0){
+		if(array_size<=0){
 		   printf("size can't be negative \n");		
 		   return -1;
 		}
@@ -73,7 +63,7 @@ while (true) {
             break;
           case 2:
            threads_num = atoi(optarg);
-		if(threads_num <= 0){
+		if(threads_num<=0){
 		   printf("amount of threads can't be negative\n");		
 		   return -1;
 		}
