@@ -1,15 +1,14 @@
 #include <errno.h>
+#include <semaphore.h>
 #include <stdbool.h>
 #include <pthread.h>
 #include <stdio.h>
 #include <stdlib.h>
-
 #include <unistd.h>
-
 #include <getopt.h>
 
 int result = 1; /* A shared variable for threads */
-pthread_mutex_t mut = PTHREAD_MUTEX_INITIALIZER;
+sem_t semaphore;
 int mod;
 
 struct Args {
@@ -18,21 +17,20 @@ struct Args {
 };
 
 void ThreadFactorial(void *args) {
-  struct Args *thread_args = (struct Args *)args;
-  int thread_result = 1;
-  int i = (*thread_args).begin;
-  for (; i <= (*thread_args).end; i++){
-      thread_result *= i;
-  }
-
-  pthread_mutex_lock(&mut);
-  int temp = result;
+struct Args *thread_args = (struct Args *)args;
+int thread_result = 1;
+sem_wait(&semaphore);
+int i = (*thread_args).begin;
+    for (; i <= (*thread_args).end; i++){
+        thread_result *= i;
+    }
+ int temp = result;
  // printf("\ntemp: %d\n", temp);
  // printf("\nResult1: %d\n", thread_result);
  //printf("\nmod: %d\n", mod);
-  printf("result part %d : thread begins from %d  ends to %d -> result of thread %d\n", temp, (*thread_args).begin, (*thread_args).end, (temp * thread_result) % mod);
+  printf("result part : thread begins from %d  ends to %d -> result of thread %d\n", (*thread_args).begin, (*thread_args).end, (temp * thread_result) % mod);
   result = (temp * thread_result) % mod;
-  pthread_mutex_unlock(&mut);
+  sem_post(&semaphore);
 }
 
 int main(int argc, char **argv) {
@@ -106,7 +104,7 @@ int main(int argc, char **argv) {
            argv[0]);
     return 1;
   }
-
+  sem_init(&semaphore, 0, 1);
   pthread_t threads[pnum];
   struct Args args[pnum];
 
@@ -114,7 +112,7 @@ int main(int argc, char **argv) {
   for (i = 0; i < pnum; i++) {
       args[i].begin = (k / pnum) * i + 1;
       args[i].end = (k / pnum) * (i + 1);
-      if (pthread_create(&threads[i], NULL, (void *)ThreadFactorial, (void *)(args+i))) {
+      if (pthread_create(&threads[i], NULL, (void *)ThreadFactorial, (void *)(args + i))) {
       printf("Error: pthread_create failed!\n");
       return 1;
       }
@@ -124,6 +122,7 @@ int main(int argc, char **argv) {
     pthread_join(threads[i], NULL);
   }
 
+  sem_destroy(&semaphore);
   printf("\nResult: %d\n", result);
 
   return 0;
