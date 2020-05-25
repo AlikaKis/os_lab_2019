@@ -19,6 +19,8 @@ struct FactorialArgs {
   uint64_t mod;
 };
 
+pthread_mutex_t mut = PTHREAD_MUTEX_INITIALIZER;
+
 uint64_t MultModulo(uint64_t a, uint64_t b, uint64_t mod) {
   uint64_t result = 0;
   a = a % mod;
@@ -36,6 +38,11 @@ uint64_t Factorial(const struct FactorialArgs *args) {
   uint64_t ans = 1;
 
   // TODO: your code here
+  for (uint64_t i = args->begin; i <= args->end; i++)
+  {
+    ans *= i % args->mod;
+  }
+  ans %= args->mod;
 
   return ans;
 }
@@ -68,10 +75,20 @@ int main(int argc, char **argv) {
       case 0:
         port = atoi(optarg);
         // TODO: your code here
+        if (port <=0)
+        {
+          printf("port must be a positive number\n");
+          return 1;
+        }
         break;
       case 1:
         tnum = atoi(optarg);
         // TODO: your code here
+         if (tnum <=0)
+        {
+          printf("tnum must be a positive number\n");
+          return 1;
+        }
         break;
       default:
         printf("Index %d is out of options\n", option_index);
@@ -156,13 +173,26 @@ int main(int argc, char **argv) {
 
       fprintf(stdout, "Receive: %llu %llu %llu\n", begin, end, mod);
 
+      uint64_t part = (end-begin+1)/tnum;
+
       struct FactorialArgs args[tnum];
       for (uint32_t i = 0; i < tnum; i++) {
         // TODO: parallel somehow
-        args[i].begin = 1;
-        args[i].end = 1;
+        args[i].begin = begin + i*part;
         args[i].mod = mod;
-
+        if (i != 0)
+        {
+          args[i].begin++;
+        }
+        if (i == (tnum - 1))
+        {
+          args[i].end = end;
+        }
+        else
+        {
+          args[i].end = begin + (i+1)*part;
+        }
+    
         if (pthread_create(&threads[i], NULL, ThreadFactorial,
                            (void *)&args[i])) {
           printf("Error: pthread_create failed!\n");
@@ -172,9 +202,11 @@ int main(int argc, char **argv) {
 
       uint64_t total = 1;
       for (uint32_t i = 0; i < tnum; i++) {
+        pthread_mutex_lock(&mut);
         uint64_t result = 0;
         pthread_join(threads[i], (void **)&result);
         total = MultModulo(total, result, mod);
+        pthread_mutex_unlock(&mut);
       }
 
       printf("Total: %llu\n", total);
