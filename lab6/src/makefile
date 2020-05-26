@@ -8,4 +8,4 @@ all : MultModulo.c server.c client.c
 	gcc client.c -L. -lMultModulo -lpthread -o client
 
 clean :
-	rm factor.o libMultModulo.so server client
+	rm MultModulo.o libMultModulo.so server client
