@@ -12,6 +12,7 @@
 #include <sys/types.h>
 
 #include "pthread.h"
+#include "MultModulo.h"
 
 struct FactorialArgs {
   uint64_t begin;
@@ -21,24 +22,12 @@ struct FactorialArgs {
 
 pthread_mutex_t mut = PTHREAD_MUTEX_INITIALIZER;
 
-uint64_t MultModulo(uint64_t a, uint64_t b, uint64_t mod) {
-  uint64_t result = 0;
-  a = a % mod;
-  while (b > 0) {
-    if (b % 2 == 1)
-      result = (result + a) % mod;
-    a = (a * 2) % mod;
-    b /= 2;
-  }
-
-  return result % mod;
-}
-
 uint64_t Factorial(const struct FactorialArgs *args) {
   uint64_t ans = 1;
+  uint64_t i;
 
   // TODO: your code here
-  for (uint64_t i = args->begin; i <= args->end; i++)
+  for (i = args->begin; i <= args->end; i++)
   {
     ans *= i % args->mod;
   }
@@ -178,7 +167,8 @@ int main(int argc, char **argv) {
     int part = number > tnum ? (number / tnum) : 1;
 
       struct FactorialArgs args[tnum];
-      for (uint32_t i = 0; i < tnum; i++) {
+      uint32_t i;
+      for (i = 0; i < tnum; i++) {
         // TODO: parallel somehow
         args[i].begin = begin + i*part;
         args[i].mod = mod;
@@ -203,7 +193,7 @@ int main(int argc, char **argv) {
       }
 
       uint64_t total = 1;
-      for (uint32_t i = 0; i < tnum; i++) {
+      for (i = 0; i < tnum; i++) {
         pthread_mutex_lock(&mut);
         uint64_t result = 0;
         pthread_join(threads[i], (void **)&result);

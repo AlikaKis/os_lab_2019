@@ -17,19 +17,6 @@ struct Server {
   int port;
 };
 
-uint64_t MultModulo(uint64_t a, uint64_t b, uint64_t mod) {
-  uint64_t result = 0;
-  a = a % mod;
-  while (b > 0) {
-    if (b % 2 == 1)
-      result = (result + a) % mod;
-    a = (a * 2) % mod;
-    b /= 2;
-  }
-
-  return result % mod;
-}
-
 bool ConvertStringToUI64(const char *str, uint64_t *val) {
   char *end = NULL;
   unsigned long long i = strtoull(str, &end, 10);
@@ -66,18 +53,33 @@ int main(int argc, char **argv) {
 
     switch (c) {
     case 0: {
-      switch (option_index) {
-      case 0:
+    switch (option_index) {
+    case 0:
         ConvertStringToUI64(optarg, &k);
-        // TODO: your code here
+        // TODO: my code here
+        if (k <= 0)
+        {
+            printf("k must be a positive number\n");
+            return 1;
+        }
         break;
-      case 1:
+    case 1:
         ConvertStringToUI64(optarg, &mod);
-        // TODO: your code here
+        // TODO: my code here
+        if (mod <= 0)
+        {
+            printf("mod must be a positive number\n");
+            return 1;
+        }
         break;
-      case 2:
-        // TODO: your code here
+    case 2:
+        // TODO: my code here
         memcpy(servers, optarg, strlen(optarg));
+        if (strlen(servers) == sizeof('\0'))
+        {
+            printf("servers must be a path to file with ip:port\n");
+            return 1;
+        }
         break;
       default:
         printf("Index %d is out of options\n", option_index);
@@ -106,7 +108,8 @@ int main(int argc, char **argv) {
   memcpy(to[0].ip, "127.0.0.1", sizeof("127.0.0.1"));
 
   // TODO: work continiously, rewrite to make parallel
-  for (int i = 0; i < servers_num; i++) {
+  int i;
+  for (i = 0; i < servers_num; i++) {
     struct hostent *hostname = gethostbyname(to[i].ip);
     if (hostname == NULL) {
       fprintf(stderr, "gethostbyname failed with %s\n", to[i].ip);
@@ -162,3 +165,4 @@ int main(int argc, char **argv) {
 
   return 0;
 }
+
