@@ -138,6 +138,7 @@ int main(int argc, char **argv) {
     while (true) {
       unsigned int buffer_size = sizeof(uint64_t) * 3;
       char from_client[buffer_size];
+      //Получаем сообщение из сокета клиента в from_client
       int read = recv(client_fd, from_client, buffer_size, 0);
 
       if (!read)
@@ -153,9 +154,10 @@ int main(int argc, char **argv) {
 
       pthread_t threads[tnum];
 
-      uint64_t begin = 0;
-      uint64_t end = 0;
-      uint64_t mod = 0;
+     //Разбиваем информацию от клиента
+      unsigned long long begin = 0;
+      unsigned long long end = 0;
+      unsigned long long mod = 0;
       memcpy(&begin, from_client, sizeof(uint64_t));
       memcpy(&end, from_client + sizeof(uint64_t), sizeof(uint64_t));
       memcpy(&mod, from_client + 2 * sizeof(uint64_t), sizeof(uint64_t));
@@ -184,7 +186,7 @@ int main(int argc, char **argv) {
         {
           args[i].end = begin + (i+1)*part;
         }
-    
+        //Создаём потоки с функцией подсчёта факториала
         if (pthread_create(&threads[i], NULL, ThreadFactorial,
                            (void *)&args[i])) {
           printf("Error: pthread_create failed!\n");
@@ -192,7 +194,7 @@ int main(int argc, char **argv) {
         }
       }
 
-      uint64_t total = 1;
+      unsigned long long total = 1;
       for (i = 0; i < tnum; i++) {
         pthread_mutex_lock(&mut);
         uint64_t result = 0;
@@ -203,6 +205,7 @@ int main(int argc, char **argv) {
 
       printf("Total: %llu\n", total);
 
+      //Отправляем сообщения в сокет клиента
       char buffer[sizeof(total)];
       memcpy(buffer, &total, sizeof(total));
       err = send(client_fd, buffer, sizeof(total), 0);
