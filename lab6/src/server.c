@@ -173,7 +173,9 @@ int main(int argc, char **argv) {
 
       fprintf(stdout, "Receive: %llu %llu %llu\n", begin, end, mod);
 
-      uint64_t part = (end-begin+1)/tnum;
+    uint64_t number = end - begin;
+
+    int part = number > tnum ? (number / tnum) : 1;
 
       struct FactorialArgs args[tnum];
       for (uint32_t i = 0; i < tnum; i++) {
