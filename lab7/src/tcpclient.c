@@ -17,7 +17,8 @@ int main(int argc, char *argv[]) {
   int nread;
   int BUFSIZE = -1;
   int PORT = -1;
-  char IP[16] = {'\0'};;
+  char IP[16] = {'\0'};
+
   while (1) {
   int current_optind = optind ? optind : 1;
     static struct option options[] = {{"port", required_argument, 0, 0},
@@ -63,40 +64,35 @@ int main(int argc, char *argv[]) {
   }
 
   char buf[BUFSIZE];
+  
   struct sockaddr_in servaddr;
-  if (argc < 3) {
-    printf("Too few arguments \n");
-    exit(1);
-  }
 
-  if ((fd = socket(AF_INET, SOCK_STREAM, 0)) < 0) {
-    perror("socket creating");
+   if ((fd = socket(AF_INET, SOCK_STREAM, 0)) < 0) {
+    perror("socket creating problem (SOCK_STREAM)");
     exit(1);
   }
 
   memset(&servaddr, 0, SIZE);
   servaddr.sin_family = AF_INET;
-
-  if (inet_pton(AF_INET, argv[1], &servaddr.sin_addr) <= 0) {
-    perror("bad address");
+  if (inet_pton(AF_INET, IP, &servaddr.sin_addr) <= 0) {
+    perror("bad address problem (SOCK_STREAM)");
     exit(1);
   }
-
-  servaddr.sin_port = htons(atoi(argv[2]));
+  servaddr.sin_port = htons(PORT);
 
   if (connect(fd, (SADDR *)&servaddr, SIZE) < 0) {
-    perror("connect");
+    perror("connect problem (SOCK_STREAM)");
     exit(1);
   }
 
-  write(1, "Input message to send\n", 22);
+  write(1, "Input message to send: \n", 22);
   while ((nread = read(0, buf, BUFSIZE)) > 0) {
     if (write(fd, buf, nread) < 0) {
-      perror("write");
+      perror("write problem (SOCK_STREAM)");
       exit(1);
     }
   }
 
-  close(fd);
+    close(fd);
   exit(0);
 }

@@ -65,42 +65,43 @@ char IP[16] = {'\0'};;
     return 1;
   }
 
-  char sendline[BUFSIZE], recvline[BUFSIZE + 1];
+  
   struct sockaddr_in servaddr;
   struct sockaddr_in cliaddr;
+char sendline[BUFSIZE], recvline[BUFSIZE + 1];
 
-  if (argc < 3) {
-    printf("usage: client <IPaddress of server>\n");
-    exit(1);
-  }
-
+  
   memset(&servaddr, 0, sizeof(servaddr));
   servaddr.sin_family = AF_INET;
+  if (inet_pton(AF_INET, IP, &servaddr.sin_addr) < 0) {
+    perror("inet_pton problem (SOCK_DGRAM)");
+    exit(1);
+  }
   servaddr.sin_port = htons(SERV_PORT);
 
-  if (inet_pton(AF_INET, argv[1], &servaddr.sin_addr) < 0) {
-    perror("inet_pton problem");
-    exit(1);
-  }
   if ((sockfd = socket(AF_INET, SOCK_DGRAM, 0)) < 0) {
-    perror("socket problem");
+    perror("socket problem (SOCK_DGRAM)");
     exit(1);
   }
 
-  write(1, "Enter string\n", 13);
+  write(1, "Enter string: \n", 13);
 
   while ((n = read(0, sendline, BUFSIZE)) > 0) {
+    //соединение не обязательно
     if (sendto(sockfd, sendline, n, 0, (SADDR *)&servaddr, SLEN) == -1) {
-      perror("sendto problem");
+      perror("sendto problem (SOCK_DGRAM)");
       exit(1);
     }
+    sleep(1);
 
     if (recvfrom(sockfd, recvline, BUFSIZE, 0, NULL, NULL) == -1) {
-      perror("recvfrom problem");
+      perror("recvfrom problem (SOCK_DGRAM)");
       exit(1);
     }
-
     printf("REPLY FROM SERVER= %s\n", recvline);
+
+    
   }
-  close(sockfd);
+    close(sockfd);
 }
+
